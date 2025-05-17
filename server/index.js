@@ -1,13 +1,21 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-require('dotenv').config();
+import express from 'express';
+import mongoose from 'mongoose';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import Groq from "groq-sdk";
+
+dotenv.config();
+
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 const app = express();
 
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Make groq available to routes
+app.locals.groq = groq;
 
 // Connect to MongoDB with improved error handling
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/petchly')
@@ -23,13 +31,13 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/petchly')
   });
 
 // Routes
-const bookingRoutes = require('./routes/bookings');
-const adminRoutes = require('./routes/admin');
+import bookingRoutes from './routes/bookings.js';
+import adminRoutes from './routes/admin.js';
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/admin', adminRoutes);
 
 // Start server
-const PORT = process.env.PORT || 5001; // Changed default to 5001
+const PORT = process.env.PORT
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
