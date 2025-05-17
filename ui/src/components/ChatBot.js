@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { bookingService } from '../services/api';
 
 function ChatBot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -7,7 +8,7 @@ function ChatBot() {
   ]);
   const [inputText, setInputText] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!inputText.trim()) return;
 
@@ -18,11 +19,13 @@ function ChatBot() {
       isBot: false 
     }]);
 
+    const result = await bookingService.getAIAssistance(inputText);
+
     // Add bot response placeholder
     setTimeout(() => {
       setMessages(prev => [...prev, { 
         id: prev.length + 1, 
-        text: "Thanks for your message! Our team will assist you shortly.", 
+        text: result.response, 
         isBot: true 
       }]);
     }, 1000);
