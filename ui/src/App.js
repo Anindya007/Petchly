@@ -11,6 +11,8 @@ import ChatBot from './components/ChatBot';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import PetHotel from './pages/PetHotel';
+import VideoConference1 from './pages/VideoConference1';
+//import IframeComponent from './pages/iframe'; // Import the IframeComponent
 
 function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -41,6 +43,7 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/virtual-vet" element={<VideoConference1/>} />
         </Routes>
         <ToastContainer position="top-right" autoClose={3000} />
         <ChatBot />
