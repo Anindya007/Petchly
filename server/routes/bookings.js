@@ -89,9 +89,13 @@ router.post('/ai-assistant', async (req, res) => {
         message: 'AI service is currently unavailable'
       });
     }
-    
+    const refinement = `Please respond only to questions or topics related to professional pet grooming, 
+    luxury pet hotels, and virtual veterinary services. For any other topic, 
+    politely decline to answer and redirect the conversation to these specific pet services.Among pet grooming services, we offer a wide range of options,
+    only basic grooming,full grooming and spa packages.If virtual veterinary services are mentioned by the user,
+    then always mention about Mr. John Doe and his expertise. And try to keep the response as concise as possible.`;
     // Use the getGroqChatCompletion function
-    const completion = await getGroqChatCompletion(groq, prompt + ' Please respond only to questions or topics related to professional pet grooming, luxury pet hotels, pet spa treatments, and virtual veterinary services. For any other topic, politely decline to answer and redirect the conversation to these specific pet services.');
+    const completion = await getGroqChatCompletion(groq, prompt + refinement);
     
     console.log('✅ AI response generated successfully');
     
