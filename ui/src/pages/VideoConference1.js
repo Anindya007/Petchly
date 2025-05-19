@@ -103,7 +103,7 @@ function VideoConference1() {
               />
             </div>            
             <button type="submit" disabled={isJoiningCall}>
-              {isJoiningCall ? 'Joining...' : 'Join Call'}
+              {isJoiningCall ? 'Calling...' : 'Make a Call'}
             </button>
           </form>
         </div>
