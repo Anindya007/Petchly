@@ -12,6 +12,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import PetHotel from './pages/PetHotel';
 import VideoConference from './pages/VideoConference';
+import Checkout from './pages/Checkout';
 //import IframeComponent from './pages/iframe'; // Import the IframeComponent
 
 function App() {
@@ -42,6 +43,7 @@ function App() {
           />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/checkout" element={<Checkout />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/virtual-vet" element={<VideoConference/>} />
         </Routes>

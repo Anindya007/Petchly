@@ -2,6 +2,13 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaPaw, FaHotel, FaWifi, FaUtensils, FaVideo, FaHeart, FaBone, FaBath, FaTemperatureLow, FaTimes } from 'react-icons/fa';
 
+// Add this at the top of the file, after the imports
+const roomImages = {
+  cozyDen: "https://images.pexels.com/photos/4587996/pexels-photo-4587996.jpeg",
+  deluxeSuite: "https://images.pexels.com/photos/4587985/pexels-photo-4587985.jpeg",
+  royalPalace: "https://images.pexels.com/photos/4587990/pexels-photo-4587990.jpeg"
+};
+
 function PetHotel() {
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [bookingType, setBookingType] = useState('nightly');
@@ -40,58 +47,61 @@ function PetHotel() {
     }
   ];
 
+  
+  
+  // Then modify the roomTypes array to use these images
   const roomTypes = [
-    {
-      id: 1,
-      name: "Cozy Den",
-      nightPrice: "49",
-      hourlyPrice: "8",
-      image: "https://images.pexels.com/photos/4587996/pexels-photo-4587996.jpeg", // Cozy pet room
-      features: [
-        "Comfortable pet bed",
-        "Climate controlled",
-        "Basic toys",
-        "2 meals/day",
-        "Daily cleaning"
-      ],
-      petSize: "Small pets (up to 20 lbs)",
-      description: "A snug, comfortable space perfect for small pets who enjoy cozy environments"
-    },
-    {
-      id: 2,
-      name: "Deluxe Suite",
-      nightPrice: "79",
-      hourlyPrice: "12",
-      image: "https://images.pexels.com/photos/4587985/pexels-photo-4587985.jpeg", // Deluxe pet suite
-      features: [
-        "Spacious play area",
-        "Premium pet bed",
-        "Toy selection",
-        "3 meals/day",
-        "Window view",
-        "Daily grooming"
-      ],
-      petSize: "Medium pets (20-50 lbs)",
-      description: "A roomy suite with dedicated play space and premium amenities"
-    },
-    {
-      id: 3,
-      name: "Royal Palace",
-      nightPrice: "129",
-      hourlyPrice: "20",
-      image: "https://images.pexels.com/photos/4587990/pexels-photo-4587990.jpeg", // Luxury pet suite
-      features: [
-        "Extra large suite",
-        "Luxury orthopedic bed",
-        "Premium toys",
-        "4 meals/day",
-        "24/7 Webcam",
-        "Private play area",
-        "Spa services"
-      ],
-      petSize: "Large pets (50+ lbs)",
-      description: "The ultimate in pet luxury with maximum space and premium services"
-    }
+      {
+        id: 1,
+        name: "Cozy Den",
+        nightPrice: "49",
+        hourlyPrice: "8",
+        image: roomImages.cozyDen,
+        features: [
+          "Comfortable pet bed",
+          "Climate controlled",
+          "Basic toys",
+          "2 meals/day",
+          "Daily cleaning"
+        ],
+        petSize: "Small pets (up to 20 lbs)",
+        description: "A snug, comfortable space perfect for small pets who enjoy cozy environments"
+      },
+      {
+        id: 2,
+        name: "Deluxe Suite",
+        nightPrice: "79",
+        hourlyPrice: "12",
+        image: roomImages.deluxeSuite,
+        features: [
+          "Spacious play area",
+          "Premium pet bed",
+          "Toy selection",
+          "3 meals/day",
+          "Window view",
+          "Daily grooming"
+        ],
+        petSize: "Medium pets (20-50 lbs)",
+        description: "A roomy suite with dedicated play space and premium amenities"
+      },
+      {
+        id: 3,
+        name: "Royal Palace",
+        nightPrice: "129",
+        hourlyPrice: "20",
+        image: roomImages.royalPalace,
+        features: [
+          "Extra large suite",
+          "Luxury orthopedic bed",
+          "Premium toys",
+          "4 meals/day",
+          "24/7 Webcam",
+          "Private play area",
+          "Spa services"
+        ],
+        petSize: "Large pets (50+ lbs)",
+        description: "The ultimate in pet luxury with maximum space and premium services"
+      }
   ];
 
   const openBookingModal = (room = null) => {
@@ -106,45 +116,166 @@ function PetHotel() {
   };
 
   // Booking Form Component
-  const BookingForm = () => (
-    <div className="bg-white rounded-2xl shadow-xl p-8 max-w-3xl w-full">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-3xl font-bold text-[#2A3342]">Book a Stay</h2>
-        <button
-          onClick={closeBookingModal}
-          className="text-gray-400 hover:text-gray-600 transition-colors"
-        >
-          <FaTimes className="w-6 h-6" />
-        </button>
-      </div>
+  const BookingForm = () => {
+    const [formData, setFormData] = useState({
+      petName: '',
+      petType: 'dog',
+      startDate: '',
+      endDate: '',
+      specialRequests: ''
+    });
+
+    const handleChange = (e) => {
+      const { name, value } = e.target;
+      setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmit = (e) => {
+      e.preventDefault();
       
-      <form className="space-y-6">
-        {/* ... Previous form fields stay the same ... */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Booking Type</label>
-            <select 
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#2A3342] focus:ring-[#2A3342]"
-              value={bookingType}
-              onChange={(e) => setBookingType(e.target.value)}
-            >
-              <option value="nightly">Nightly Stay</option>
-              <option value="hourly">Hourly Care</option>
-            </select>
-          </div>
-          
-          {/* ... Rest of the form fields stay the same ... */}
+      // Create booking data object with all required information
+      const bookingData = {
+        ...formData,
+        bookingType,
+        roomId: selectedRoom?.id || '',
+        roomName: selectedRoom?.name || '',
+        price: bookingType === 'nightly' ? selectedRoom?.nightPrice : selectedRoom?.hourlyPrice,
+        priceUnit: bookingType === 'nightly' ? 'night' : 'hour'
+      };
+      
+      // Store booking data in localStorage to access it on checkout page
+      localStorage.setItem('petHotelBooking', JSON.stringify(bookingData));
+      
+      // Navigate to checkout
+      window.location.href = '/checkout';
+    };
+
+    return (
+      <div className="bg-white rounded-2xl shadow-xl p-8 max-w-3xl w-full">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-3xl font-bold text-[#2A3342]">Book a Stay</h2>
+          <button
+            onClick={closeBookingModal}
+            className="text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <FaTimes className="w-6 h-6" />
+          </button>
         </div>
         
-        <button
-          type="submit"
-          className="w-full bg-[#2A3342] text-white py-3 rounded-full hover:bg-[#1F2937] transition-colors duration-300"
-        >
-          Book Now
-        </button>
-      </form>
-    </div>
-  );
+        <form className="space-y-6" onSubmit={handleSubmit}>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Booking Type</label>
+              <select 
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#2A3342] focus:ring-[#2A3342]"
+                value={bookingType}
+                onChange={(e) => setBookingType(e.target.value)}
+              >
+                <option value="nightly">Nightly Stay</option>
+                <option value="hourly">Hourly Care</option>
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Room Type</label>
+              <input 
+                type="text" 
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#2A3342] focus:ring-[#2A3342]"
+                value={selectedRoom?.name || 'Select a room'}
+                readOnly
+              />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Pet Name</label>
+              <input 
+                type="text" 
+                name="petName"
+                value={formData.petName}
+                onChange={handleChange}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#2A3342] focus:ring-[#2A3342]"
+                required
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Pet Type</label>
+              <select 
+                name="petType"
+                value={formData.petType}
+                onChange={handleChange}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#2A3342] focus:ring-[#2A3342]"
+              >
+                <option value="dog">Dog</option>
+                <option value="cat">Cat</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                {bookingType === 'nightly' ? 'Check-in Date' : 'Start Date & Time'}
+              </label>
+              <input 
+                type={bookingType === 'nightly' ? 'date' : 'datetime-local'} 
+                name="startDate"
+                value={formData.startDate}
+                onChange={handleChange}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#2A3342] focus:ring-[#2A3342]"
+                required
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                {bookingType === 'nightly' ? 'Check-out Date' : 'End Date & Time'}
+              </label>
+              <input 
+                type={bookingType === 'nightly' ? 'date' : 'datetime-local'} 
+                name="endDate"
+                value={formData.endDate}
+                onChange={handleChange}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#2A3342] focus:ring-[#2A3342]"
+                required
+              />
+            </div>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Special Requests</label>
+            <textarea 
+              name="specialRequests"
+              value={formData.specialRequests}
+              onChange={handleChange}
+              rows="3" 
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#2A3342] focus:ring-[#2A3342]"
+            ></textarea>
+          </div>
+          
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <div className="flex justify-between items-center">
+              <span className="text-gray-700">Price:</span>
+              <span className="text-xl font-bold text-[#2A3342]">
+                ${bookingType === 'nightly' ? selectedRoom?.nightPrice : selectedRoom?.hourlyPrice}
+                <span className="text-sm text-gray-600">/{bookingType === 'nightly' ? 'night' : 'hour'}</span>
+              </span>
+            </div>
+          </div>
+          
+          <button
+            type="submit"
+            className="w-full bg-[#2A3342] text-white py-3 rounded-full hover:bg-[#1F2937] transition-colors duration-300"
+          >
+            Book Now
+          </button>
+        </form>
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-white pt-16">
@@ -287,4 +418,4 @@ const styles = `
 }
 `;
 
-export default PetHotel; 
+export default PetHotel;
