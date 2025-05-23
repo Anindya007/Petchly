@@ -60,7 +60,7 @@ const ShippingForm = ({ onNext, inputRef }) => {
 
   return (
     <div className="animate-fade-in">
-      <h2 className="text-xl font-semibold mb-6 text-checkout-text">Shipping Information</h2>
+      <h2 className="text-xl font-semibold mb-6 text-checkout-text">Customer Details</h2>
       
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

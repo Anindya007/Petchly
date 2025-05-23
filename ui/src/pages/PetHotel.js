@@ -144,7 +144,7 @@ function PetHotel() {
       };
       
       // Store booking data in localStorage to access it on checkout page
-      localStorage.setItem('petHotelBooking', JSON.stringify(bookingData));
+      localStorage.setItem('booking', JSON.stringify(bookingData));
       
       // Navigate to checkout
       window.location.href = '/checkout';
@@ -218,30 +218,65 @@ function PetHotel() {
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div>
               <label className="block text-sm font-medium text-gray-700">
-                {bookingType === 'nightly' ? 'Check-in Date' : 'Start Date & Time'}
+                {bookingType === 'nightly' ? 'Check-in Date' : 'Start Date'}
               </label>
               <input 
-                type={bookingType === 'nightly' ? 'date' : 'datetime-local'} 
+                type="date"
                 name="startDate"
                 value={formData.startDate}
                 onChange={handleChange}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#2A3342] focus:ring-[#2A3342]"
                 required
+                min={new Date().toISOString().split('T')[0]}
               />
+              {bookingType === 'hourly' && (
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Start Time
+                  </label>
+                  <input 
+                    type="time"
+                    name="startTime"
+                    value={formData.startTime}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#2A3342] focus:ring-[#2A3342]"
+                    required
+                  />
+                </div>
+              )}
             </div>
             
             <div>
               <label className="block text-sm font-medium text-gray-700">
-                {bookingType === 'nightly' ? 'Check-out Date' : 'End Date & Time'}
+                {bookingType === 'nightly' ? 'Check-out Date' : 'End Time'}
               </label>
-              <input 
-                type={bookingType === 'nightly' ? 'date' : 'datetime-local'} 
-                name="endDate"
-                value={formData.endDate}
-                onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#2A3342] focus:ring-[#2A3342]"
-                required
-              />
+              {bookingType === 'nightly' ? (
+                <input 
+                  type="date"
+                  name="endDate"
+                  value={formData.endDate}
+                  onChange={handleChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#2A3342] focus:ring-[#2A3342]"
+                  required
+                  min={new Date().toISOString().split('T')[0]}
+                />
+              ) : (
+                <select
+                  name="endDate"
+                  value={formData.endDate}
+                  onChange={handleChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#2A3342] focus:ring-[#2A3342]"
+                  required
+                >
+                  <option value="">Select duration</option>
+                  <option value="1">1 hour</option>
+                  <option value="2">2 hours</option>
+                  <option value="3">3 hours</option>
+                  <option value="4">4 hours</option>
+                  <option value="6">6 hours</option>
+                  <option value="8">8 hours</option>
+                </select>
+              )}
             </div>
           </div>
           
