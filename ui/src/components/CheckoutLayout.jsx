@@ -8,14 +8,17 @@ const CheckoutLayout = ({ children, currentStep }) => {
     <div className="min-h-screen bg-checkout-bg flex flex-col md:flex-row">
       <div className="flex-1 p-4 md:p-8 lg:p-12 animate-fade-in">
         <div className="max-w-3xl mx-auto">
-          <a href="/" className="inline-block mb-8">
-            <h1 className="text-2xl font-semibold text-checkout-text">YourStore</h1>
-          </a>
-          
+          {/* Logo */}
+          <div className="flex items-center mb-8">
+            
+            <h1 className="text-2xl font-semibold ml-2 text-checkout-text">
+              Checkout
+            </h1>
+          </div>
           {/* Breadcrumb navigation */}
           <div className="mb-8 hidden md:block">
             <nav className="flex space-x-4">
-              {["Shipping", "Payment", "Confirmation"].map((step, index) => (
+              {["Customer Details", "Payment", "Confirmation"].map((step, index) => (
                 <div key={step} className="flex items-center">
                   <div 
                     className={`flex items-center ${index < currentStep ? "text-checkout-accent" : "text-gray-400"}`}

@@ -8,6 +8,11 @@ const roomImages = {
     royalpalace: "https://images.pexels.com/photos/4587990/pexels-photo-4587990.jpeg"
   };
 
+const serviceImages = {
+  'Basic Grooming': 'https://images.pexels.com/photos/6816860/pexels-photo-6816860.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
+  'Full Grooming': 'https://images.pexels.com/photos/5731866/pexels-photo-5731866.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
+  'Spa Package': 'https://images.pexels.com/photos/6646917/pexels-photo-6646917.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'
+};
 const CheckoutSidebar = ({ onCompletePayment }) => {
   const [cartItems, setCartItems] = useState([]);
   const [subtotal, setSubtotal] = useState(0);
@@ -15,19 +20,20 @@ const CheckoutSidebar = ({ onCompletePayment }) => {
   
   useEffect(() => {
     // Fetch booking data from localStorage
-    const bookingData = localStorage.getItem('petHotelBooking');
+    const bookingData = localStorage.getItem('booking');
     
     if (bookingData) {
       try {
         const parsedBooking = JSON.parse(bookingData);
-        console.log('Parsed Booking:', parsedBooking.roomName.toLowerCase().replace(/\s+/g, ''));
+        console.log('Parsed Booking:', parsedBooking); // Add this line to log the parsed booking data
         // Create cart item from booking data
         const bookingItem = {
-          id: parsedBooking.roomId || 1,
-          name: parsedBooking.roomName || 'Pet Hotel Room',
+          id: parsedBooking.roomId || parsedBooking.serviceId,
+          name: parsedBooking.roomName || parsedBooking.serviceName,
           price: parseFloat(parsedBooking.price) || 0,
-          quantity: 1,
-          image: roomImages[parsedBooking.roomName.toLowerCase().replace(/\s+/g, '')] || roomImages.cozyden
+          image: parsedBooking.roomId 
+            ? roomImages[parsedBooking.roomName?.toLowerCase().replace(/\s+/g, '')] || roomImages.cozyden
+            : serviceImages[parsedBooking.serviceName] || serviceImages['Basic Grooming']
         };
         
         setCartItems([bookingItem]);
@@ -39,7 +45,8 @@ const CheckoutSidebar = ({ onCompletePayment }) => {
   }, []);
   
   useEffect(() => {
-    const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    console.log('Cart Items:', cartItems); // Add this line to log the cart items
+    const total = cartItems.reduce((sum, item) => sum + (item.price), 0);
     setSubtotal(total);
   }, [cartItems]);
 
@@ -69,7 +76,6 @@ const CheckoutSidebar = ({ onCompletePayment }) => {
             <div className="flex-1">
               <p className="text-sm font-medium text-checkout-text">{item.name}</p>
               <div className="flex justify-between mt-1">
-                <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
                 <p className="text-sm font-medium">${item.price.toFixed(2)}</p>
               </div>
             </div>
