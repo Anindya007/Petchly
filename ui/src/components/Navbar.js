@@ -29,24 +29,25 @@ function Navbar() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex md:items-center md:space-x-8">
-            {navigation.map((item) => (
-              <Link
-                key={item.name}
-                to={item.href}
-                className={`inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2 transition-colors duration-200 ${
-                  isActive(item.href)
-                    ? 'border-[#2A3342] text-[#2A3342]'
-                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-[#2A3342]'
-                }`}
-              >
-                {item.name}
-              </Link>
-            ))}
+            {navigation
+              .map((item) => (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  className={`inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2 transition-colors duration-200 ${
+                    isActive(item.href)
+                      ? 'border-[#2A3342] text-[#2A3342]'
+                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-[#2A3342]'
+                  }`}
+                >
+                  {item.name}
+                </Link>
+              ))}
             <Link
-              to="/services"
+              to="/admin"
               className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-full text-white bg-[#2A3342] hover:bg-[#1F2937] transition-colors duration-200"
             >
-              Book Now
+              Admin Panel
             </Link>
           </div>
 
