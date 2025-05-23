@@ -65,6 +65,53 @@ router.get('/', async (req, res) => {
   }
 });
 
+// Update booking status to confirmed
+router.patch('/:id/confirm', async (req, res) => {
+  console.log('🔄 Received request to confirm booking:', req.params.id);
+  try {
+    const bookingId = req.params.id;
+    console.log('🔄 Attempting to confirm booking:', bookingId);
+
+    // Find the booking and check if it exists
+const booking = await Booking.findOne({ referenceNumber: bookingId });
+    if (!booking) {
+      console.log('❌ Booking not found:', bookingId);
+      return res.status(404).json({
+        success: false,
+        message: 'Booking not found'
+      });
+    }
+
+    // Check if the booking is already confirmed
+    if (booking.status !== 'pending') {
+      console.log('⚠️ Booking is not in pending status:', booking.status);
+      return res.status(400).json({
+        success: false,
+        message: `Booking cannot be confirmed. Current status: ${booking.status}`
+      });
+    }
+
+    // Update the booking status to confirmed
+    booking.status = 'confirmed';
+    const updatedBooking = await booking.save();
+    console.log('✅ Booking confirmed successfully:', updatedBooking);
+
+    res.json({
+      success: true,
+      message: 'Booking confirmed successfully',
+      booking: updatedBooking
+    });
+
+  } catch (error) {
+    console.error('❌ Error confirming booking:', error);
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred while confirming the booking',
+      error: error.message
+    });
+  }
+});
+
 // AI Assistant route for pet care advice
 router.post('/ai-assistant', async (req, res) => {
   try {

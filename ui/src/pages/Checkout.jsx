@@ -17,9 +17,19 @@ const Checkout = () => {
   };
 
   const handlePaymentSubmit = (data) => {
+    console.log(data);
     setPaymentData(data);
     // Generate a random order ID for demo purposes
-    const generatedOrderId = `ORD-${Math.floor(Math.random() * 10000)}-${Math.floor(Math.random() * 10000)}`;
+    const referenceNumber = data.bookingReference; // a sample reference number BK082204M557
+    
+    // Formats the reference number by adding hyphens between transitions of numbers and letters
+    // Example: 'BK082204M557' becomes 'B-K-08220-4-M-557'
+    const generatedOrderId = referenceNumber.split('').reduce((acc, char, i, arr) => {
+      if (i === 0) return char;
+      const isCurrentNumber = !isNaN(char);
+      const isPrevNumber = !isNaN(arr[i-1]);
+      return acc + (isCurrentNumber !== isPrevNumber ? '-' : '') + char;
+    }, '');
     setOrderId(generatedOrderId);
     setStep(2);
     window.scrollTo(0, 0);

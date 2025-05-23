@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { BsCreditCard2Front, BsReceipt } from "react-icons/bs";
+import { toast } from "react-toastify";
 
 const PaymentForm = ({ onBack, onNext }) => {
   const [paymentMethod, setPaymentMethod] = useState("credit_card");
@@ -80,7 +81,52 @@ const PaymentForm = ({ onBack, onNext }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (validate()) {
-      onNext({ ...formData, paymentMethod });
+      // Get booking data from localStorage
+      const bookingData = JSON.parse(localStorage.getItem('booking'));
+      const referenceNumber = bookingData?.referenceNumber;
+      
+      if (referenceNumber) {
+        try {
+          // Process the order
+          processOrder(referenceNumber);
+        } catch (error) {
+          console.error('Error processing order:', error);
+          toast.error('Error processing your order. Please try again.');
+        }
+      } else {
+        toast.error('No booking information found. Please try again.');
+      }
+    }
+  };
+  
+  const processOrder = async (referenceNumber) => {
+    try {
+      
+      const confirmResponse = await fetch(`http://localhost:5001/api/bookings/${referenceNumber}/confirm`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+      
+      if (!confirmResponse.ok) {
+        const errorData = await confirmResponse.json();
+        toast.error(errorData.message || 'Failed to confirm booking');
+        return; // Stop execution if confirmation fails
+      }
+      
+      const confirmData = await confirmResponse.json();
+      
+      
+      // Save the confirmed order to localStorage for the confirmation page
+      localStorage.setItem('confirmedOrder', JSON.stringify(confirmData.booking));
+      
+      // Continue with the next step in checkout flow only if everything succeeded
+      onNext({ ...formData, paymentMethod, bookingReference: referenceNumber });
+      
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('An unexpected error occurred. Please try again.');
     }
   };
 

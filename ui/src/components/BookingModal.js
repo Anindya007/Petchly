@@ -26,8 +26,8 @@ function BookingModal({ isOpen, onClose, service }) {
     return slots;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
+    
     
     try {
       const response = await fetch('http://localhost:5001/api/bookings', {
@@ -46,7 +46,7 @@ function BookingModal({ isOpen, onClose, service }) {
 
       if (response.ok) {
         const data = await response.json();
-        toast.success(`Booking created successfully! Reference: ${data.referenceNumber}`);
+        toast.success(`Booking created successfully! Reference: ${data.booking.referenceNumber}`);
         onClose();
         setFormData({
           petName: '',
@@ -58,6 +58,8 @@ function BookingModal({ isOpen, onClose, service }) {
           time: '',
           notes: ''
         });
+
+        return data.booking.referenceNumber;
       } else {
         const errorData = await response.json();
         toast.error(errorData.message || 'Failed to create booking');
@@ -74,7 +76,7 @@ function BookingModal({ isOpen, onClose, service }) {
         <h3 className="text-2xl font-bold text-[#2A3342] mb-6">
           Book {service?.name}
         </h3>
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form className="space-y-6">
           {/* Pet Information */}
           <div className="space-y-4">
             <h4 className="text-lg font-semibold text-[#2A3342]">Pet Information</h4>
@@ -209,10 +211,25 @@ function BookingModal({ isOpen, onClose, service }) {
               Cancel
             </button>
             <button
-              type="submit"
+              type="button"
+              onClick={async () => {
+                const referenceNumber = await handleSubmit();
+                if (!referenceNumber){
+                  return;
+                }
+                // Save booking details to localStorage
+                                
+            localStorage.setItem('booking', JSON.stringify({              
+              serviceId: service.id,
+              serviceName: service.name,
+              price: service.price,
+              referenceNumber: referenceNumber
+            }));
+                window.location.href = '/checkout';
+              }}
               className="px-6 py-2 border border-transparent rounded-full text-white bg-[#2A3342] hover:bg-[#1F2937] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2A3342]"
             >
-              Book Now
+              Proceed to Checkout
             </button>
           </div>
         </form>
@@ -221,4 +238,4 @@ function BookingModal({ isOpen, onClose, service }) {
   );
 }
 
-export default BookingModal; 
+export default BookingModal;
