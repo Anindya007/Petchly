@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Booking = require('../models/Booking');
+const RoomBooking = require('../models/roomBooking');
 
 // Create booking
 router.post('/', async (req, res) => {
@@ -56,12 +57,28 @@ router.post('/', async (req, res) => {
 // Get all bookings
 router.get('/', async (req, res) => {
   try {
-    const bookings = await Booking.find();
+    // Get both normal bookings and room bookings
+    const [bookings, roomBookings] = await Promise.all([
+      Booking.find(),
+      RoomBooking.find()
+    ]);
+
     console.log('📚 Retrieved bookings:', bookings.length);
-    res.json(bookings);
+    console.log('📚 Retrieved room bookings:', roomBookings.length);
+
+    // Combine both types of bookings
+    const allBookings = {
+      serviceBookings: bookings,
+      roomBookings: roomBookings
+    };
+
+    res.json(allBookings);
   } catch (error) {
     console.error('❌ Error fetching bookings:', error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ 
+      success: false,
+      message: error.message 
+    });
   }
 });
 
@@ -161,6 +178,116 @@ router.post('/ai-assistant', async (req, res) => {
   }
 });
 
+
+// Create room booking
+router.post('/room', async (req, res) => {
+  try {
+    console.log('📝 Received room booking data:', req.body);
+
+    // Validate required fields for room booking (excluding 'ownerName', 'email', 'phone')
+    const requiredFields = ['petName', 'petType', 'roomId', 'roomName', 'startDate', 'endDate', 'bookingType', 'price', 'priceUnit'];
+    const missingFields = requiredFields.filter(field => !req.body[field]);
+    
+    if (missingFields.length > 0) {
+      console.log('❌ Missing fields:', missingFields);
+      return res.status(400).json({
+        success: false,
+        message: `Missing required fields: ${missingFields.join(', ')}`
+      });
+    }
+
+    // Create room booking
+    const roomBooking = new RoomBooking(req.body);
+    console.log('📋 Attempting to save room booking:', roomBooking);
+
+    // Save room booking
+    const savedRoomBooking = await roomBooking.save();
+    console.log('✅ Room booking saved successfully:', savedRoomBooking);
+
+    res.status(201).json({
+      success: true,
+      message: 'Room booking created successfully',
+      booking: savedRoomBooking
+    });
+
+  } catch (error) {
+    console.error('❌ Server Error:', error);
+    
+    if (error.name === 'ValidationError') {
+      console.log('❌ Validation Error:', error.errors);
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: Object.values(error.errors).map(err => err.message)
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred while creating the room booking',
+      error: error.message
+    });
+  }
+});
+
+// Get all room bookings
+router.get('/room', async (req, res) => {
+  try {
+    const roomBookings = await RoomBooking.find();
+    console.log('📚 Retrieved room bookings:', roomBookings.length);
+    res.json(roomBookings);
+  } catch (error) {
+    console.error('❌ Error fetching room bookings:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Update room booking status
+router.patch('/room/:id/confirm', async (req, res) => {
+  console.log('🔄 Received request to confirm room booking:', req.params.id);
+  try {
+    const bookingId = req.params.id;
+    console.log('🔄 Attempting to confirm room booking:', bookingId);
+
+    const roomBooking = await RoomBooking.findOne({ referenceNumber: bookingId });
+    if (!roomBooking) {
+      console.log('❌ Room booking not found:', bookingId);
+      return res.status(404).json({
+        success: false,
+        message: 'Room booking not found'
+      });
+    }
+
+    // Check if the booking is already confirmed
+    if (roomBooking.status !== 'pending') {
+      console.log('⚠️ Room booking is not in pending status:', roomBooking.status);
+      return res.status(400).json({
+        success: false,
+        message: `Room booking cannot be confirmed. Current status: ${roomBooking.status}`
+      });
+    }
+
+    // Update the booking status to confirmed
+    roomBooking.status = 'confirmed';
+    const updatedRoomBooking = await roomBooking.save();
+    console.log('✅ Room booking confirmed successfully:', updatedRoomBooking);
+
+    res.json({
+      success: true,
+      message: 'Room booking confirmed successfully',
+      booking: updatedRoomBooking
+    });
+
+  } catch (error) {
+    console.error('❌ Error confirming room booking:', error);
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred while confirming the room booking',
+      error: error.message
+    });
+  }
+});
+
 async function getGroqChatCompletion(groq,userInput) {
   return groq.chat.completions.create({
     messages: [
@@ -171,6 +298,6 @@ async function getGroqChatCompletion(groq,userInput) {
     ],
     model: "llama-3.3-70b-versatile",
   });
-}
+};
 
 module.exports = router;

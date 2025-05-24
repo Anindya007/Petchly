@@ -25,15 +25,20 @@ const CheckoutSidebar = ({ onCompletePayment }) => {
     if (bookingData) {
       try {
         const parsedBooking = JSON.parse(bookingData);
-        console.log('Parsed Booking:', parsedBooking); // Add this line to log the parsed booking data
+        console.log('Parsed Booking:', parsedBooking);
+
+        // Calculate total amount for room bookings
+        const totalAmount = parsedBooking.roomId ? calculateTotal(parsedBooking) : parseFloat(parsedBooking.price) || 0;
+
         // Create cart item from booking data
         const bookingItem = {
           id: parsedBooking.roomId || parsedBooking.serviceId,
           name: parsedBooking.roomName || parsedBooking.serviceName,
-          price: parseFloat(parsedBooking.price) || 0,
+          price: totalAmount,
           image: parsedBooking.roomId 
             ? roomImages[parsedBooking.roomName?.toLowerCase().replace(/\s+/g, '')] || roomImages.cozyden
-            : serviceImages[parsedBooking.serviceName] || serviceImages['Basic Grooming']
+            : serviceImages[parsedBooking.serviceName],
+          roomId: parsedBooking.roomId, // Add this line to include roomId in the cart item
         };
         
         setCartItems([bookingItem]);
@@ -43,9 +48,34 @@ const CheckoutSidebar = ({ onCompletePayment }) => {
       }
     }
   }, []);
+
+  const calculateTotal = (parsedBooking) => {
+    let totalAmount = 0;
+    if (parsedBooking.startDate && parsedBooking.endDate) {
+      const startDate = new Date(parsedBooking.startDate);
+      const endDate = new Date(parsedBooking.endDate);
+      
+      if (endDate < startDate) {
+        console.error('End date cannot be before start date');
+        return 0;
+      }
+      
+      if (parsedBooking.bookingType === 'nightly') {
+        // Calculate total nights
+        const diffTime = Math.abs(endDate - startDate);
+        const totalNights = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        totalAmount = parseFloat(parsedBooking.price) * totalNights;
+      } else if (parsedBooking.bookingType === 'hourly') {
+        // Calculate total hours
+        const diffTime = Math.abs(endDate - startDate);
+        const totalHours = Math.ceil(diffTime / (1000 * 60 * 60));
+        totalAmount = parseFloat(parsedBooking.price) * totalHours;
+      }
+    }
+    return totalAmount; // Return the total amount calculated above ;
+  }
   
   useEffect(() => {
-    console.log('Cart Items:', cartItems); // Add this line to log the cart items
     const total = cartItems.reduce((sum, item) => sum + (item.price), 0);
     setSubtotal(total);
   }, [cartItems]);
@@ -75,8 +105,18 @@ const CheckoutSidebar = ({ onCompletePayment }) => {
             </div>
             <div className="flex-1">
               <p className="text-sm font-medium text-checkout-text">{item.name}</p>
-              <div className="flex justify-between mt-1">
-                <p className="text-sm font-medium">${item.price.toFixed(2)}</p>
+              <div className="flex flex-col mt-1">
+                {item.roomId ? (
+                  <>
+                    <p className="text-xs text-gray-500">
+                      ${(item.price / Math.ceil(Math.abs(new Date(JSON.parse(localStorage.getItem('booking')).endDate) - new Date(JSON.parse(localStorage.getItem('booking')).startDate)) / (1000 * 60 * 60 * 24))).toFixed(2)} per night
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {Math.ceil(Math.abs(new Date(JSON.parse(localStorage.getItem('booking')).endDate) - new Date(JSON.parse(localStorage.getItem('booking')).startDate)) / (1000 * 60 * 60 * 24))} nights
+                    </p>
+                  </>
+                ) : null}
+                <p className="text-sm font-medium">Total: ${item.price.toFixed(2)}</p>
               </div>
             </div>
           </div>

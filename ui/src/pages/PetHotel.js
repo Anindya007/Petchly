@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaPaw, FaHotel, FaWifi, FaUtensils, FaVideo, FaHeart, FaBone, FaBath, FaTemperatureLow, FaTimes } from 'react-icons/fa';
+import { toast } from 'react-toastify';
 
 // Add this at the top of the file, after the imports
 const roomImages = {
@@ -120,6 +121,9 @@ function PetHotel() {
     const [formData, setFormData] = useState({
       petName: '',
       petType: 'dog',
+      ownerName: '',
+      email: '',
+      phone: '',
       startDate: '',
       endDate: '',
       specialRequests: ''
@@ -130,7 +134,7 @@ function PetHotel() {
       setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
       e.preventDefault();
       
       // Create booking data object with all required information
@@ -142,12 +146,32 @@ function PetHotel() {
         price: bookingType === 'nightly' ? selectedRoom?.nightPrice : selectedRoom?.hourlyPrice,
         priceUnit: bookingType === 'nightly' ? 'night' : 'hour'
       };
-      
-      // Store booking data in localStorage to access it on checkout page
-      localStorage.setItem('booking', JSON.stringify(bookingData));
-      
-      // Navigate to checkout
-      window.location.href = '/checkout';
+
+      try {
+        const response = await fetch('http://localhost:5001/api/bookings/room', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(bookingData),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          toast.success('Room booking created successfully!');
+          closeBookingModal();
+          // Optionally redirect to a confirmation page
+          setTimeout(() => {
+            window.location.href = '/checkout';
+          }, 1500); // Delay redirect by 1.5 seconds to show toast message
+        } else {
+          toast.error(data.message || 'Failed to create room booking');
+        }
+      } catch (error) {
+        console.error('Error creating room booking:', error);
+        toast.error('An error occurred while creating the booking');
+      }
     };
 
     return (
