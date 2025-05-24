@@ -1,4 +1,5 @@
 import React from 'react';
+import AdminLogout from './AdminLogout';
 
 function DashboardStats({ stats }) {
   return (
@@ -42,7 +43,10 @@ function DashboardStats({ stats }) {
           <dd className="mt-1 text-3xl font-semibold text-red-900">{stats.cancelled || 0}</dd>
         </div>
       </div>
+      <AdminLogout />
     </div>
+
+    
   );
 }
 

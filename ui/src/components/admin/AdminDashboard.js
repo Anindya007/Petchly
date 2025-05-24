@@ -23,7 +23,22 @@ function AdminDashboard() {
 
   const fetchBookings = async () => {
     try {
-      const response = await fetch('http://localhost:5001/api/admin/bookings');
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch('http://localhost:5001/api/admin/bookings', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) {
+        if (response.status === 401) {
+          toast.error('Authentication failed. Please login again.');
+          localStorage.removeItem('adminToken');
+          return;
+        }
+        throw new Error('Failed to fetch bookings');
+      }
+      
       const data = await response.json();
       setBookings(data);
       setLoading(false);
@@ -41,7 +56,22 @@ function AdminDashboard() {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch('http://localhost:5001/api/admin/stats');
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch('http://localhost:5001/api/admin/stats', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) {
+        if (response.status === 401) {
+          toast.error('Authentication failed. Please login again.');
+          localStorage.removeItem('adminToken');
+          return;
+        }
+        throw new Error('Failed to fetch statistics');
+      }
+      
       const data = await response.json();
       setStats(data);
     } catch (error) {
@@ -69,6 +99,7 @@ function AdminDashboard() {
                 {view === 'list' ? 'Calendar View' : 'List View'}
               </button>
               <ExportBookings bookings={bookings} />
+              
             </div>
           </div>
         </div>
@@ -78,6 +109,7 @@ function AdminDashboard() {
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         {/* Stats Section */}
         <DashboardStats stats={stats} />
+        
 
         {view === 'list' ? (
           <>
@@ -125,10 +157,12 @@ function AdminDashboard() {
                     booking={selectedBooking}
                     onStatusUpdate={async (newStatus) => {
                       try {
+                        const token = localStorage.getItem('adminToken');
                         const response = await fetch(`http://localhost:5001/api/admin/bookings/${selectedBooking._id}/status`, {
                           method: 'PUT',
                           headers: {
                             'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
                           },
                           body: JSON.stringify({ status: newStatus }),
                         });

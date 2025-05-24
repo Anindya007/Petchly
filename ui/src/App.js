@@ -7,6 +7,8 @@ import About from './pages/About';
 import Contact from './pages/Contact';
 import BookingModal from './components/BookingModal';
 import AdminDashboard from './components/admin/AdminDashboard';
+import AdminLogin from './pages/AdminLogin';
+import ProtectedRoute from './components/ProtectedRoute';
 import ChatBot from './components/ChatBot';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -44,7 +46,17 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/checkout" element={<Checkout />} />
-          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin" element={
+            <ProtectedRoute>
+              <AdminDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/dashboard" element={
+            <ProtectedRoute>
+              <AdminDashboard />
+            </ProtectedRoute>
+          } />
           <Route path="/virtual-vet" element={<VideoConference/>} />
         </Routes>
         <ToastContainer position="top-right" autoClose={3000} />
